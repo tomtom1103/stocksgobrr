@@ -1,5 +1,5 @@
 # stocksgobrr
 
-Money Printer go *brr*
+haha, money printer go *brr*🤑
 
-
+![](img/brr.png)
