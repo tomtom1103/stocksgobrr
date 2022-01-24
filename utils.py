@@ -1,3 +1,5 @@
+import pickle
+
 colnames =['comment_limit', 'comment_sort', '_reddit', 'approved_at_utc',
            'subreddit', 'selftext', 'author_fullname', 'saved', 'mod_reason_title', 'gilded', 'clicked',
            'title', 'link_flair_richtext', 'subreddit_name_prefixed', 'hidden', 'pwls', 'link_flair_css_class',
@@ -22,3 +24,6 @@ def maybelater(z):
     l = []
     for key in z:
         l.append(key)
+
+with open('tickers.pkl', 'rb') as f:
+    tickers = pickle.load(f)
