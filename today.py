@@ -3,6 +3,7 @@ import praw
 from config import *
 from datetime import date
 import os
+import pickle
 
 reddit = praw.Reddit(
     client_id=client_id,
@@ -14,7 +15,7 @@ reddit = praw.Reddit(
 
 today = date.today().strftime('%b-%d-%Y')
 dirname = os.path.dirname(__file__)
-filename = os.path.join(dirname, 'reports')
+reportpath = os.path.join(dirname, 'reports')
 
 def parse_submission(submission):
     return {
@@ -31,7 +32,7 @@ def main():
     brr = pd.DataFrame()
     for submission in subreddit.new(limit=None):
         brr = brr.append(parse_submission(submission), ignore_index=True)
-    brr.to_pickle(f'{filename}/{today}-goes-brr.pkl')
+    brr.to_pickle(f'{reportpath}/{today}-goes-brr.pkl')
 
 
 if __name__ == '__main__':
