@@ -20,10 +20,9 @@ colnames =['comment_limit', 'comment_sort', '_reddit', 'approved_at_utc',
            'url', 'subreddit_subscribers', 'created_utc', 'num_crossposts', 'media', 'is_video', '_fetched',
            '_comments_by_id', 'thumbnail_height', 'thumbnail_width', 'num_duplicates', '_comments', 'flair', 'mod']
 
+indexes = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+
 def maybelater(z):
     l = []
     for key in z:
         l.append(key)
-
-with open('tickers.pkl', 'rb') as f:
-    tickers = pickle.load(f)
