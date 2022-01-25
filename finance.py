@@ -1,27 +1,29 @@
 import pandas as pd
 import numpy as np
 from yahoo_fin import stock_info as si
+from tqdm import tqdm
 import pickle
 
+sp500 = pd.DataFrame(si.tickers_sp500())
+nasdaq = pd.DataFrame(si.tickers_nasdaq())
+dow = pd.DataFrame(si.tickers_dow())
+other = pd.DataFrame(si.tickers_other())
+kws = pd.DataFrame(['SPY', 'VTI', 'HODL', 'ATH'])
 
-def tickers():
-    df1 = pd.DataFrame(si.tickers_sp500())
-    df2 = pd.DataFrame(si.tickers_nasdaq())
-    df3 = pd.DataFrame(si.tickers_dow())
-    df4 = pd.DataFrame(si.tickers_other())
+sym1 = set(symbol for symbol in sp500[0].values.tolist())
+sym2 = set(symbol for symbol in nasdaq[0].values.tolist())
+sym3 = set(symbol for symbol in dow[0].values.tolist())
+sym4 = set(symbol for symbol in other[0].values.tolist())
+sym5 = set(symbol for symbol in kws[0].values.tolist())
 
-    sym1 = set(symbol for symbol in df1[0].values.tolist())
-    sym2 = set(symbol for symbol in df2[0].values.tolist())
-    sym3 = set(symbol for symbol in df3[0].values.tolist())
-    sym4 = set(symbol for symbol in df4[0].values.tolist())
-
-    symbols = set.union(sym1, sym2, sym3, sym4)
+def tickers(*args):
+    symbols = set.union(*args)
 
     my_list = ['W', 'R', 'P', 'Q']  # warrants, rights, first preferred issue, bankruptcy
     del_set = set()
     sav_set = set()
 
-    for symbol in symbols:
+    for symbol in tqdm(symbols):
         if len(symbol) > 4 and symbol[-1] in my_list:
             del_set.add(symbol)
         else:
@@ -37,8 +39,18 @@ def tickers():
         tickers.dropna(subset=['tickers'], inplace=True)
     else:
         pass
-    tickers.to_pickle('utils/tickers.pkl')
+
+    tickers['length'] = tickers.tickers.str.len()
+    tickers = tickers[tickers.length > 1] #한글자 티커는 드랍
+
+    tickers = tickers[~tickers.tickers.str.contains('PY')]
+    tickers = tickers[~tickers.tickers.str.contains('ST')]
+    tickers = tickers[~tickers.tickers.str.contains('TH')]
+    #진짜 개무식한 코드. 나중에 바꾸자
+
+    tickers.to_pickle('utils/tickers_big3.pkl')
+    print('done')
 
 
 if __name__ == '__main__':
-    tickers()
+    tickers(sym1,sym2,sym3,sym5)
