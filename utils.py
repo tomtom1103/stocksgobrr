@@ -1,4 +1,19 @@
 import pickle
+import pandas as pd
+import numpy as np
+from utils import indexes
+from cleantext import clean
+import datetime
+import flair
+import timeit
+from tqdm import tqdm
+import time
+
+sentiment_model = flair.models.TextClassifier.load('en-sentiment')
+tickers = pd.read_pickle('utils/tickers_big3.pkl')
+testdata = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
+flairtest = pd.read_pickle('utils/flair_test.pkl')
+
 
 colnames =['comment_limit', 'comment_sort', '_reddit', 'approved_at_utc',
            'subreddit', 'selftext', 'author_fullname', 'saved', 'mod_reason_title', 'gilded', 'clicked',
@@ -26,3 +41,20 @@ def maybelater(z):
     l = []
     for key in z:
         l.append(key)
+
+
+def tickercount_1():
+    tickers = pd.read_pickle('utils/tickers_big3.pkl')
+    tickerlist = list(tickers['tickers'])
+    fullcounts=[]
+    for ticker in tqdm(tickerlist):
+        tickercount = []
+        sentences = [flair.data.Sentence(post) for post in testdata['selftext']] #한 포스트를 센텐스화
+        sentences = [sentence.tokens for sentence in sentences] #센텐스를 토큰화
+        sentence_tokens = [[str(token) for token in sentence] for sentence in sentences]  # 토큰을 str list 화
+        count = int(len([ticker for sentence in sentence_tokens for token in sentence if ticker in token]))
+        #각 포스트 안 해당 티커가 존재하면 티커의 수 카운트
+        tickercount.append(f'{ticker} was mentioned {count} times in this post.')
+        fullcounts.append(str(tickercount))
+
+    testdata['ticker_info'] = fullcounts
