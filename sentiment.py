@@ -1,45 +1,48 @@
 import pandas as pd
-import numpy as np
 from cleantext import clean
 import datetime
 import flair
-import timeit
 from tqdm import tqdm
-import time
 
 sentiment_model = flair.models.TextClassifier.load('en-sentiment')
 tickers = pd.read_pickle('utils/tickers_big3.pkl')
-testdata = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
+brr = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
 flairtest = pd.read_pickle('utils/flair_test.pkl')
 
 
 
-def summary(): #파일의 통계치
+def summary(brr): #파일의 통계치
     text = ['title', 'selftext']
     idx = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
     stats = pd.DataFrame(columns=['title', 'selftext'], index=idx)
-    for t in text:
-        st = testdata[f'{t}'].apply(len).describe()
+    print('Summarizing..')
+    for t in tqdm(text):
+        st = brr[f'{t}'].apply(len).describe()
         stats[f'{t}'] = st
-    return stats
 
-def cleaner(): #파일 클리닝
-    cleantitle = [clean(text, lower=False) for text in testdata['title']]
-    testdata['title'] = cleantitle
+    print(f'There are {stats.title[0]} posts today.')
+    print(f'Avg. length of the posts are {stats.selftext[1]}.')
 
-    cleanselftext = [clean(text, lower=False) for text in testdata['selftext']]
-    testdata['selftext'] = cleanselftext
+def cleaner(brr): #파일 클리닝
+    print('Cleaning Text..')
+    cleantitle = [clean(text, lower=False) for text in brr['title']]
+    brr['title'] = cleantitle
 
-    realtime = [datetime.datetime.fromtimestamp(time) for time in testdata['created_utc']]
-    testdata['realtime'] = realtime
+    cleanselftext = [clean(text, lower=False) for text in brr['selftext']]
+    brr['selftext'] = cleanselftext
 
-    score = [int(score) for score in testdata['score']]
-    testdata['score'] = score
-    return testdata
+    realtime = [datetime.datetime.fromtimestamp(time) for time in brr['created_utc']]
+    brr['realtime'] = realtime
+
+    score = [int(score) for score in brr['score']]
+    brr['score'] = score
+
+    print('Cleaned!')
+    return brr
 
 
-def tickercount():
-    sentences = [flair.data.Sentence(post) for post in testdata['selftext']] #한 포스트를 센텐스화
+def tickercount(brr):
+    sentences = [flair.data.Sentence(post) for post in brr['selftext']] #한 포스트를 센텐스화
     sentences = [sentence.tokens for sentence in sentences] #센텐스를 토큰화
     sentence_tokens = [[str(token) for token in sentence] for sentence in sentences]  # 토큰을 str list 화
 
@@ -47,6 +50,7 @@ def tickercount():
     tickerlist = list(tickers['tickers'])
 
     fullcount=[]
+    print('Analyzing tickers..')
     for sentence in tqdm(sentence_tokens):
         sentence = str(sentence)
         sentence = clean(sentence, lower=False)
@@ -65,17 +69,23 @@ def tickercount():
 
             secondcount.append(tickercount)
         fullcount.append(str(tickercount))
-    testdata['tickerinfo'] = fullcount
+    brr['tickerinfo'] = fullcount
+    return brr
 
 
 
-def flair(): #1000개의 본문파싱하는데 대략 8분걸렸다
+def flairme(brr): #1000개의 본문파싱하는데 대략 8분걸렸다
     probability = []
     sentiment = []
-    for text in testdata['selftext'].to_list():
+    print('Analyzing Sentiment..')
+    for text in tqdm(brr['selftext'].to_list()):
         sentence = flair.data.Sentence(text)
         sentiment_model.predict(sentence)
         probability.append(sentence.labels[0].score)
         sentiment.append(sentence.labels[0].value)
-    testdata['probability'] = probability
-    testdata['sentiment'] = sentiment
+    brr['probability'] = probability
+    brr['sentiment'] = sentiment
+    return brr
+
+if __name__ == '__main__':
+    summary()
