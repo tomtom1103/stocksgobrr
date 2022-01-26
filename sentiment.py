@@ -11,18 +11,6 @@ flairtest = pd.read_pickle('utils/flair_test.pkl')
 
 
 
-def summary(brr): #파일의 통계치
-    text = ['title', 'selftext']
-    idx = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
-    stats = pd.DataFrame(columns=['title', 'selftext'], index=idx)
-    print('Summarizing..')
-    for t in tqdm(text):
-        st = brr[f'{t}'].apply(len).describe()
-        stats[f'{t}'] = st
-
-    print(f'There are {stats.title[0]} posts today.')
-    print(f'Avg. length of the posts are {stats.selftext[1]}.')
-
 def cleaner(brr): #파일 클리닝
     print('Cleaning Text..')
     cleantitle = [clean(text, lower=False) for text in brr['title']]
@@ -40,6 +28,31 @@ def cleaner(brr): #파일 클리닝
     print('Cleaned!')
     return brr
 
+def summary(brr): #파일의 통계치
+    text = ['title', 'selftext']
+    idx = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+    stats = pd.DataFrame(columns=['title', 'selftext'], index=idx)
+    print('Summarizing..')
+    for t in tqdm(text):
+        st = brr[f'{t}'].apply(len).describe()
+        stats[f'{t}'] = st
+
+    print(f'There are {stats.title[0]} posts today.')
+    print(f'Avg. length of the posts are {stats.selftext[1]}.')
+
+
+def flairme(brr): #1000개의 본문파싱하는데 대략 8분걸렸다
+    probability = []
+    sentiment = []
+    print('Analyzing Sentiment..')
+    for text in tqdm(brr['selftext'].to_list()):
+        sentence = flair.data.Sentence(text)
+        sentiment_model.predict(sentence)
+        probability.append(sentence.labels[0].score)
+        sentiment.append(sentence.labels[0].value)
+    brr['probability'] = probability
+    brr['sentiment'] = sentiment
+    return brr
 
 def tickercount(brr):
     sentences = [flair.data.Sentence(post) for post in brr['selftext']] #한 포스트를 센텐스화
@@ -70,21 +83,6 @@ def tickercount(brr):
             secondcount.append(tickercount)
         fullcount.append(str(tickercount))
     brr['tickerinfo'] = fullcount
-    return brr
-
-
-
-def flairme(brr): #1000개의 본문파싱하는데 대략 8분걸렸다
-    probability = []
-    sentiment = []
-    print('Analyzing Sentiment..')
-    for text in tqdm(brr['selftext'].to_list()):
-        sentence = flair.data.Sentence(text)
-        sentiment_model.predict(sentence)
-        probability.append(sentence.labels[0].score)
-        sentiment.append(sentence.labels[0].value)
-    brr['probability'] = probability
-    brr['sentiment'] = sentiment
     return brr
 
 if __name__ == '__main__':
