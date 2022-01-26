@@ -4,6 +4,16 @@ from config import *
 from datetime import date
 import os
 import pickle
+from cleantext import clean
+import datetime
+import flair
+from tqdm import tqdm
+from sentiment import cleaner, summary, flairme, tickercount
+
+sentiment_model = flair.models.TextClassifier.load('en-sentiment')
+tickers = pd.read_pickle('utils/tickers_big3.pkl')
+testdata = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
+flairtest = pd.read_pickle('utils/flair_test.pkl')
 
 reddit = praw.Reddit(
     client_id=client_id,
@@ -28,11 +38,21 @@ def parse_submission(submission):
 
 
 def main():
-    subreddit = reddit.subreddit('Stocks')
-    brr = pd.DataFrame()
-    for submission in subreddit.new(limit=None):
-        brr = brr.append(parse_submission(submission), ignore_index=True)
-    brr.to_pickle(f'{reportpath}/{today}-goes-brr.pkl')
+    #subreddit = reddit.subreddit('Stocks')
+    #brr = pd.DataFrame()
+    #for submission in subreddit.new(limit=None):
+    #    brr = brr.append(parse_submission(submission), ignore_index=True)
+    #brr.to_pickle(f'{reportpath}/{today}-goes-brr.pkl')
+
+    brr = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
+    summary(brr)
+    cleaner(brr)
+    flairme(brr)
+    tickercount(brr)
+    print('done!')
+    print(brr)
+    brr.to_excel('fulltest.xlsx')
+    return brr
 
 
 if __name__ == '__main__':
