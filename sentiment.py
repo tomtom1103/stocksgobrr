@@ -5,11 +5,6 @@ import flair
 from tqdm import tqdm
 
 sentiment_model = flair.models.TextClassifier.load('en-sentiment')
-tickers = pd.read_pickle('utils/tickers_big3.pkl')
-brr = pd.read_pickle('reports/Jan-24-2022-goes-brr.pkl')
-flairtest = pd.read_pickle('utils/flair_test.pkl')
-
-
 
 def cleaner(brr): #파일 클리닝
     print('Cleaning Text..')
