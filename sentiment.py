@@ -78,6 +78,8 @@ def tickercount(brr):
             secondcount.append(tickercount)
         fullcount.append(str(tickercount))
     brr['tickerinfo'] = fullcount
+    replacer = brr.tickerinfo.replace('[]', 0)
+    brr['tickerinfo'] = replacer
     return brr
 
 if __name__ == '__main__':
