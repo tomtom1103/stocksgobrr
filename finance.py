@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from yahoo_fin import stock_info as si
 from tqdm import tqdm
-import pickle
 
 sp500 = pd.DataFrame(si.tickers_sp500())
 nasdaq = pd.DataFrame(si.tickers_nasdaq())
