@@ -25,7 +25,7 @@ class Autolog:
 
         print(
             f'''
-        Welcome back.
+        Welcome back Tom.
         Previous close for {ticker} was {np.round(company_close, 3)},
         and its weekly change is {np.round(company_weekly_change, 3)}%.
         50-day average: {fifty_day_avg}
