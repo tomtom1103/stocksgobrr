@@ -3,6 +3,7 @@ import numpy as np
 #from yahoo_fin import stock_info as si
 #from tqdm import tqdm
 import yfinance as yf
+import fear_and_greed
 
 class Autolog:
 
@@ -46,6 +47,11 @@ class Autolog:
         nasdaq_weekly_change = (nasdaq_close - nasdaq_lastweek_close)/nasdaq_lastweek_close * 100
         nasdaq_threeday_change = (nasdaq_close - nasdaq_threeday_close)/nasdaq_threeday_close * 100
 
+        fng = fear_and_greed.get()
+        fng_value = fng[0]
+        fng_sentiment = fng[1]
+        fng_date = fng[2]
+
         print(
             f'''
         Welcome back Tom.
@@ -53,6 +59,10 @@ class Autolog:
         VIX weekly change is {np.round(vix_weekly_change, 3)} %.
         VIX three day change is {np.round(vix_threeday_change, 3)} %.
         50-day average: {vix_fifty_day_avg}, 200-day average: {vix_twohundred_day_avg}.
+        
+        Fear and Greed Index
+        Current market sentiment is at {fng_value}, {fng_sentiment}.
+        last indexed at {fng_date}.
         
         Three day change recap
         Dow Jones: {np.round(dow_threeday_change, 3)} %
