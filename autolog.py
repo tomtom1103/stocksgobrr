@@ -1,4 +1,4 @@
-#import pandas as pd
+import pandas as pd
 import numpy as np
 #from yahoo_fin import stock_info as si
 #from tqdm import tqdm
@@ -54,6 +54,7 @@ class Autolog:
 
         print(
             f'''
+        ----------RECAP----------
         Welcome back Tom.
         Previous close for VIX was {np.round(vix_close, 3)},
         VIX weekly change is {np.round(vix_weekly_change, 3)} %.
@@ -73,11 +74,13 @@ class Autolog:
         Dow Jones: {np.round(dow_weekly_change, 3)} %
         S&P 500: {np.round(snp_weekly_change, 3)} %
         NASDAQ: {np.round(nasdaq_weekly_change, 3)} %
+        ----------RECAP----------
         '''
         )
 
     def stockinfo(self, ticker):
         company = yf.Ticker(f"{ticker}")
+        company_name = company.info['shortName']
         fifty_day_avg = company.info['fiftyDayAverage']
         twohundred_day_avg = company.info['twoHundredDayAverage']
         year_high = company.info['fiftyTwoWeekHigh']
@@ -86,25 +89,79 @@ class Autolog:
         company_hist = company.history(period='1mo')
         company_close = company_hist['Close'][-1]
         company_lastweek_close = company_hist['Close'][-7]
+        company_threeday_close = company_hist['Close'][-3]
         company_weekly_change = (company_close - company_lastweek_close)/company_lastweek_close * 100
+        company_threeday_change = (company_close - company_threeday_close)/company_threeday_close * 100
 
 
         print(
             f'''
-        Previous close for {ticker} was ${np.round(company_close, 3)},
-        and its weekly change is {np.round(company_weekly_change, 3)}%.
+        ----------{company_name}----------
+        
+        Previous close for {company_name} was ${np.round(company_close, 3)},
+        Its weekly change is {np.round(company_weekly_change, 3)} %.
+        Its three day change is {np.round(company_threeday_change, 3)} %.
         50-day average: ${fifty_day_avg}
-        200-day average: ${twohundred_day_avg}. 
+        200-day average: ${twohundred_day_avg}.
+        
+        ----------{company_name}----------    
         '''
         )
 
+    def mystocks(self):
+        mystocks = pd.read_excel('mystocks.xlsx')
+        mystocklist = mystocks['My Stocks'].tolist()
+
+        for ticker in mystocklist:
+            thomas.stockinfo(ticker)
+            '''
+            company = yf.Ticker(f"{ticker}")
+            company_name = company.info['shortName']
+            fifty_day_avg = company.info['fiftyDayAverage']
+            twohundred_day_avg = company.info['twoHundredDayAverage']
+            year_high = company.info['fiftyTwoWeekHigh']
+            year_low = company.info['fiftyTwoWeekLow']
+
+            company_hist = company.history(period='1mo')
+            company_close = company_hist['Close'][-1]
+            company_lastweek_close = company_hist['Close'][-7]
+            company_threeday_close = company_hist['Close'][-3]
+            company_weekly_change = (company_close - company_lastweek_close) / company_lastweek_close * 100
+            company_threeday_change = (company_close - company_threeday_close) / company_threeday_close * 100
+            '''
+        #print(mystocks)
+
+    def news(self,ticker):
+        pass
+
+
+    def flowcontrol(self):
+        choice = int(input(
+        """
+        --------------------------------
+        
+        What Menu would you like to see?
+        1. Particular stock
+        2. My stocks
+        3. News
+        
+        --------------------------------
+        >> """
+
+        ))
+
+        if choice == 1:
+            ticker = input("Input ticker>> ")
+            thomas.stockinfo(ticker)
+            thomas.flowcontrol()
+        elif choice == 2:
+            thomas.mystocks()
+            thomas.flowcontrol()
 
 
 if __name__ == '__main__':
     print("running autolog...")
 
-    today = Autolog()
-    today.daily()
-    stock = Autolog()
-    ticker = input("Input ticker>> ")
-    stock.stockinfo(ticker)
+    thomas = Autolog()
+    thomas.daily()
+    thomas.flowcontrol()
