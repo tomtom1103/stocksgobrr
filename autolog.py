@@ -4,11 +4,13 @@ from yahoo_fin import stock_info as si
 from tqdm import tqdm
 import yfinance as yf
 import fear_and_greed
+from datetime import datetime, timedelta
+from pytz import timezone
 
 class Autolog:
 
     def __init__(self):
-        pass
+        self.now = datetime.now()
 
     def daily(self):
         vix = yf.Ticker(f"^VIX")
@@ -107,11 +109,20 @@ class Autolog:
         )
 
     def particularstock_earnings(self, ticker):
+        kst = timezone('Asia/Seoul')
+        es = timezone('US/Eastern')
         next_earnings = si.get_next_earnings_date(ticker)
+        next_earnings = es.localize(next_earnings)
+        local_next_earnings = next_earnings.astimezone(kst)
+
         print(
             f'''
         {ticker} will release their next earnings on
-        {next_earnings}.
+        {next_earnings}, Eastern Time, or
+        {local_next_earnings}, Korean Standard Time.
+        
+        
+        {self.now}
             '''
         )
 
