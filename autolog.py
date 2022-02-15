@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-#from yahoo_fin import stock_info as si
+from yahoo_fin import stock_info as si
 from tqdm import tqdm
 import yfinance as yf
 import fear_and_greed
@@ -9,7 +9,6 @@ class Autolog:
 
     def __init__(self):
         pass
-
 
     def daily(self):
         vix = yf.Ticker(f"^VIX")
@@ -20,32 +19,32 @@ class Autolog:
         vix_close = vix_hist['Close'][-1]
         vix_lastweek_close = vix_hist['Close'][-7]
         vix_threeday_close = vix_hist['Close'][-3]
-        vix_weekly_change = (vix_close - vix_lastweek_close)/vix_lastweek_close * 100
-        vix_threeday_change = (vix_close - vix_threeday_close)/vix_threeday_close * 100
+        vix_weekly_change = (vix_close - vix_lastweek_close) / vix_lastweek_close * 100
+        vix_threeday_change = (vix_close - vix_threeday_close) / vix_threeday_close * 100
 
         dow = yf.Ticker(f"^DJI")
         dow_hist = dow.history(period='1mo')
         dow_close = dow_hist['Close'][-1]
         dow_lastweek_close = dow_hist['Close'][-7]
         dow_threeday_close = dow_hist['Close'][-3]
-        dow_weekly_change = (dow_close - dow_lastweek_close)/dow_lastweek_close * 100
-        dow_threeday_change = (dow_close - dow_threeday_close)/dow_threeday_close * 100
+        dow_weekly_change = (dow_close - dow_lastweek_close) / dow_lastweek_close * 100
+        dow_threeday_change = (dow_close - dow_threeday_close) / dow_threeday_close * 100
 
         snp = yf.Ticker('^GSPC')
         snp_hist = snp.history(period='1mo')
         snp_close = snp_hist['Close'][-1]
         snp_lastweek_close = snp_hist['Close'][-7]
         snp_threeday_close = snp_hist['Close'][-3]
-        snp_weekly_change = (snp_close - snp_lastweek_close)/snp_lastweek_close * 100
-        snp_threeday_change = (snp_close - snp_threeday_close)/snp_threeday_close * 100
+        snp_weekly_change = (snp_close - snp_lastweek_close) / snp_lastweek_close * 100
+        snp_threeday_change = (snp_close - snp_threeday_close) / snp_threeday_close * 100
 
         nasdaq = yf.Ticker('^IXIC')
         nasdaq_hist = nasdaq.history(period='1mo')
         nasdaq_close = nasdaq_hist['Close'][-1]
         nasdaq_lastweek_close = nasdaq_hist['Close'][-7]
         nasdaq_threeday_close = nasdaq_hist['Close'][-3]
-        nasdaq_weekly_change = (nasdaq_close - nasdaq_lastweek_close)/nasdaq_lastweek_close * 100
-        nasdaq_threeday_change = (nasdaq_close - nasdaq_threeday_close)/nasdaq_threeday_close * 100
+        nasdaq_weekly_change = (nasdaq_close - nasdaq_lastweek_close) / nasdaq_lastweek_close * 100
+        nasdaq_threeday_change = (nasdaq_close - nasdaq_threeday_close) / nasdaq_threeday_close * 100
 
         fng = fear_and_greed.get()
         fng_value = fng[0]
@@ -60,16 +59,16 @@ class Autolog:
         VIX weekly change is {np.round(vix_weekly_change, 3)} %.
         VIX three day change is {np.round(vix_threeday_change, 3)} %.
         50-day average: {vix_fifty_day_avg}, 200-day average: {vix_twohundred_day_avg}.
-        
+
         Fear and Greed Index
         Current market sentiment is at {fng_value}, {fng_sentiment}.
         last indexed at {fng_date}.
-        
+
         Three day change recap
         Dow Jones: {np.round(dow_threeday_change, 3)} %
         S&P 500: {np.round(snp_threeday_change, 3)} %
         NASDAQ: {np.round(nasdaq_threeday_change, 3)} %
-        
+
         Weekly Change recap
         Dow Jones: {np.round(dow_weekly_change, 3)} %
         S&P 500: {np.round(snp_weekly_change, 3)} %
@@ -78,7 +77,7 @@ class Autolog:
         '''
         )
 
-    def particularstock(self, ticker):
+    def particularstock_stockinfo(self, ticker):
         company = yf.Ticker(f"{ticker}")
         company_name = company.info['longName']
         fifty_day_avg = company.info['fiftyDayAverage']
@@ -90,22 +89,30 @@ class Autolog:
         company_close = company_hist['Close'][-1]
         company_lastweek_close = company_hist['Close'][-7]
         company_threeday_close = company_hist['Close'][-3]
-        company_weekly_change = (company_close - company_lastweek_close)/company_lastweek_close * 100
-        company_threeday_change = (company_close - company_threeday_close)/company_threeday_close * 100
-
+        company_weekly_change = (company_close - company_lastweek_close) / company_lastweek_close * 100
+        company_threeday_change = (company_close - company_threeday_close) / company_threeday_close * 100
 
         print(
             f'''
         ----------{company_name}----------
-        
+
         Previous close for {company_name} was ${np.round(company_close, 3)},
         Its weekly change is {np.round(company_weekly_change, 3)} %.
         Its three day change is {np.round(company_threeday_change, 3)} %.
         50-day average: ${fifty_day_avg}
         200-day average: ${twohundred_day_avg}.
-        
+
         ----------{company_name}----------    
         '''
+        )
+
+    def particularstock_earnings(self, ticker):
+        next_earnings = si.get_next_earnings_date(ticker)
+        print(
+            f'''
+        {ticker} will release their next earnings on
+        {next_earnings}.
+            '''
         )
 
     def mystocks_stocklist(self):
@@ -134,9 +141,9 @@ class Autolog:
             if company_close < twohundred_day_avg:
                 count += 1
                 print(
-                f'''
+                    f'''
         {company_name}'s current price is below the 200 day average.
-        
+
         Purchasing price: ${float(mystocks.loc[mystocks['My Stocks'] == f'{ticker}']['PP'])}
         200 day avg: ${twohundred_day_avg}
         Current price: ${company_close}
@@ -146,7 +153,7 @@ class Autolog:
 
             else:
                 print(
-                f'''
+                    f'''
         everything looks good for {company_name}.
         ------------------------------ 
                 ''')
@@ -159,10 +166,14 @@ class Autolog:
             '''
         )
 
-    def news(self,ticker):
+    def news(self, ticker):
         pass
 
-################################################
+
+    """
+    Menu Starts Here.
+    """
+
     def main_menu(self):
         choice = int(input(
         """
@@ -180,11 +191,9 @@ class Autolog:
 
         if choice == 1:
             ticker = input("Input ticker>> ")
-            thomas.particularstock(ticker)
-            thomas.main_menu()
+            thomas.particularstock_menu(ticker)
         elif choice == 2:
             thomas.mystocks_menu()
-            thomas.main_menu()
         elif choice == 3:
             print('notyet')
             thomas.main_menu()
@@ -199,7 +208,7 @@ class Autolog:
         1. My Stock List                 |
         2. 200 Day Assessment            |
         3. News #NOTYET                  |
-        4. Back To main menu             |
+        4. Back to Main Menu             |
                                          |
         ------------My Stocks------------
         >> """
@@ -217,6 +226,36 @@ class Autolog:
             thomas.mystocks_menu()
         elif choice == 4:
             thomas.main_menu()
+
+    def particularstock_menu(self,ticker):
+
+        choice = int(input(
+        """
+        ------------Particular Stock------------
+                                         |
+        What Menu would you like to see? |
+        1. Stock Info                 |
+        2. Earnings Info            |
+        3.                   |
+        4. Back to Main Menu             |
+                                         |
+        ------------Particular Stock------------
+        >> """
+
+        ))
+
+        if choice == 1:
+            thomas.particularstock_stockinfo(ticker)
+            thomas.particularstock_menu(ticker)
+        elif choice == 2:
+            thomas.particularstock_earnings(ticker)
+            thomas.particularstock_menu(ticker)
+        elif choice == 3:
+            pass
+        elif choice == 4:
+            thomas.main_menu()
+
+
 
 
 if __name__ == '__main__':
