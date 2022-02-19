@@ -6,6 +6,9 @@ import yfinance as yf
 import fear_and_greed
 from datetime import datetime, timedelta
 from pytz import timezone
+import pyautogui as pg
+import guicoordinates as coord
+import time
 
 class Autolog:
 
@@ -53,7 +56,7 @@ class Autolog:
         fng_sentiment = fng[1]
         fng_date = fng[2]
 
-        print(
+        recap = (
             f'''
         ----------RECAP----------
         Welcome back Tom.
@@ -78,6 +81,8 @@ class Autolog:
         ----------RECAP----------
         '''
         )
+        print(recap) #for the terminal
+        return recap #for bear
 
     def particularstock_stockinfo(self, ticker):
         company = yf.Ticker(f"{ticker}")
@@ -193,7 +198,8 @@ class Autolog:
         What Menu would you like to see? |   
         1. Particular stock              |   
         2. My stocks                     |   
-        3. News #NOTYET                  |   
+        3. News #NOTYET                  |     
+        4. Log to Bear                   |   
                                          |   
         ------------Main Menu------------
         >> """
@@ -208,6 +214,8 @@ class Autolog:
         elif choice == 3:
             print('notyet')
             thomas.main_menu()
+        elif choice == 4:
+            thomas.bear_menu()
 
 
     def mystocks_menu(self):
@@ -245,9 +253,9 @@ class Autolog:
         ------------Particular Stock------------
                                          |
         What Menu would you like to see? |
-        1. Stock Info                 |
-        2. Earnings Info            |
-        3.                   |
+        1. Stock Info                    |
+        2. Earnings Info                 |
+        3.                               |
         4. Back to Main Menu             |
                                          |
         ------------Particular Stock------------
@@ -266,6 +274,52 @@ class Autolog:
         elif choice == 4:
             thomas.main_menu()
 
+    def bear_menu(self):
+        choice = int(input(
+        """
+        ------------Bear Notes------------
+                                         |
+        What would you like to do?       |
+        1. Initialize Bear               |
+        2. Log today's recap             |
+        3. Back to Main Menu             |
+                                         |
+        ------------Bear Notes------------
+        >> """
+        ))
+
+        if choice == 1:
+            thomas.bear_init()
+            thomas.bear_menu()
+
+        elif choice == 2:
+            thomas.bear_log()
+            thomas.bear_menu()
+        elif choice == 3:
+            thomas.main_menu()
+
+
+    def bear_init(self):
+        dt = datetime.today()
+        month = dt.strftime('%B')
+        day = dt.strftime('%-d')
+        weekday = dt.strftime('%A')
+
+        pg.click(x=coord.test_x, y=coord.test_y) #임시 bear clicker
+        time.sleep(0.5)
+        pg.click(x=coord.stock_x, y=coord.stock_y) #투자메뉴
+        time.sleep(0.5)
+        pg.click(x=coord.newnote_x, y=coord.newnote_y) #새로운 노트
+        time.sleep(0.5)
+
+        pg.typewrite(f'{month} {day} - {weekday}')
+        time.sleep(0.5)
+        pg.press(['down', 'enter', 'enter'],interval=0.1)
+
+    def bear_log(self):
+        time.sleep(0.5)
+        pg.click(x=500, y=432)
+        pg.write(f'{daily}')
 
 
 
@@ -273,5 +327,5 @@ if __name__ == '__main__':
     print("running autolog...")
 
     thomas = Autolog()
-    thomas.daily()
+    daily = thomas.daily()
     thomas.main_menu()
